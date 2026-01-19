@@ -127,14 +127,9 @@ Find ALL buttons related to booking/scheduling and update their onClick handlers
   onClick={() => {
     console.log('[Booking] Opening Elera booking modal...');
     if (window.elera && window.elera.openBooking) {
-      // Get the site's primary color from CSS variable or computed style
-      // This ensures the booking modal matches the site's branding
-      const primaryColor = getComputedStyle(document.documentElement)
-        .getPropertyValue('--primary')?.trim() || '#5a7ffd';
-      
       window.elera.openBooking({
-        // Pass site colors to match branding
-        primaryColor: primaryColor,
+        // DO NOT pass primaryColor if the site uses light colors!
+        // The default blue (#5a7ffd) works well with white text
         onSuccess: (data) => {
           console.log('[Booking] Success:', data);
         },
@@ -157,7 +152,7 @@ Find ALL buttons related to booking/scheduling and update their onClick handlers
 The booking modal can be themed to match the site's branding:
 ```javascript
 window.elera.openBooking({
-  primaryColor: '#5a7ffd',      // Main button/accent color (hex)
+  primaryColor: '#5a7ffd',      // Main button/accent color (hex) - MUST be dark!
   secondaryColor: '#ebf0fa',    // Background color (hex)
   accentColor: '#1eb464',       // Success states (hex)
   fontFamily: 'Poppins',        // Google Font name
@@ -166,10 +161,29 @@ window.elera.openBooking({
 });
 ```
 
-**How to extract the site's primary color:**
-- Check for CSS variables: `--primary`, `--brand-color`, `--accent`
-- Look in `tailwind.config.js` for theme colors
-- Find the dominant button color used across the site
+**⚠️ CRITICAL: primaryColor MUST be a DARK color!**
+The booking modal uses white text on the primaryColor background. If you pass a light color (white, cream, beige, light gray, etc.), the text will be INVISIBLE.
+
+**DO NOT pass these colors as primaryColor:**
+- White (#fff, #ffffff)
+- Cream/beige (#f5f5dc, #faf0e6, etc.)
+- Light grays (#eee, #ddd, #ccc, etc.)
+- Any color that would have poor contrast with white text
+
+**If the site uses a light primary color**, do NOT pass primaryColor at all - let the modal use the default blue (#5a7ffd):
+```javascript
+// Site has light/white primary color - don't pass it
+window.elera.openBooking({
+  // NO primaryColor - use default
+  onSuccess: (data) => { ... },
+  onClose: () => { ... }
+});
+```
+
+**How to find a suitable dark color:**
+- Look for dark button colors (not background colors)
+- Check accent/brand colors that are used on light backgrounds
+- If the site only has light colors, skip passing primaryColor entirely
 
 **CRITICAL:** Keep ALL existing class names and styling exactly the same!
 
