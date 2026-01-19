@@ -62,9 +62,22 @@ useEffect(() => {
 
 ---
 
-### 3. Update Booking Button Click Handlers
+### 3. Update ALL Booking/Schedule Button Click Handlers (REQUIRED)
 
-Find existing "Book Now", "Schedule", or "Book Appointment" buttons and update ONLY their onClick handler:
+**Search the entire codebase** for ANY buttons or links related to booking and update their onClick to open the Elera booking modal.
+
+**Search for buttons containing text like:**
+- "Book Now"
+- "Book Appointment" 
+- "Schedule"
+- "Schedule Now"
+- "Book a Consultation"
+- "Get Started"
+- "Book Online"
+- "Make Appointment"
+- Any variation of booking/scheduling
+
+**For EACH booking button found, update the onClick handler:**
 
 **Before:**
 ```jsx
@@ -88,11 +101,23 @@ Find existing "Book Now", "Schedule", or "Book Appointment" buttons and update O
 </button>
 ```
 
-**DO NOT:**
-- Change button text
-- Change button styling/classes
-- Change button position
-- Add new buttons
+**Also check for:**
+- `<a>` tags that link to booking pages - convert to button with openBooking()
+- Buttons inside hero sections
+- Buttons in navigation/header
+- Buttons in footer
+- Buttons in contact sections
+- Buttons on service pages
+- Any CTA buttons related to appointments
+
+**KEEP:**
+- All existing button text
+- All existing CSS classes and styling
+- All existing button positions
+- The visual design exactly as-is
+
+**ONLY CHANGE:**
+- The onClick/href handler to call `window.elera?.openBooking()`
 
 ---
 
@@ -177,13 +202,19 @@ Only make these changes:
 
 - [ ] Add `<script src="https://app.elera.health/sdk.js"></script>` to index.html
 - [ ] Add SDK initialization useEffect in main App component
-- [ ] Update booking button onClick to use `window.elera.openBooking()`
+- [ ] **FIND ALL booking/schedule buttons across the entire site and update their onClick to use `window.elera.openBooking()`**
 - [ ] Connect blog posts to `window.ELERA_CONTEXT.blog_posts` (if blog exists)
 - [ ] Ensure `VITE_PROVIDER_API_KEY` env var is used
 
-**Total lines of code to change: ~20-30 lines maximum**
+**Booking buttons to find and update:**
+- Hero section CTAs
+- Navigation "Book" buttons
+- Footer booking links
+- Contact page buttons
+- Service page CTAs
+- Any "Schedule", "Book Now", "Book Appointment" buttons
 
-**Files to modify: 2-3 files maximum** (index.html, App.tsx, possibly a Blog component)
+**Total files to modify:** Likely 3-6 files (wherever booking buttons exist)
 
 ---
 
