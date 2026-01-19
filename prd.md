@@ -301,6 +301,117 @@ Only make these changes:
 - [ ] Update ALL booking/schedule button onClick handlers to call `window.elera.openBooking()`
 - [ ] Connect blog components to use `window.ELERA_CONTEXT.blog_posts` (if blog exists)
 
+---
+
+## Automatic Tracking (Handled by SDK)
+
+The Elera SDK automatically handles all Google and Meta tracking. **You do NOT need to add any tracking code manually.** The SDK loads gtag.js and Meta Pixel automatically when initialized.
+
+### 1. Page Load Tracking (Automatic on `initialize()`)
+
+When the SDK initializes, it automatically:
+
+**Google Analytics (GA4):**
+- Fires `page_view` event with provider context
+- Custom dimensions: `therapist_id`, `therapist_name`, `therapist_domain`, `specialty`, `state`, `city`
+
+**Meta Pixel:**
+- Fires `PageView` event
+- Fires `ViewContent` event with provider details
+
+**Server-side (Elera):**
+- Tracks `page_view` with UTM parameters and GCLID
+
+**Expected console output:**
+```
+[EleraBooking] SDK v2.0.0 loaded
+[EleraBooking] SDK instance created with key: elera_xxxxx...
+[EleraBooking] Initializing SDK...
+[EleraBooking] Loading gtag.js with Google Ads: AW-17881598003 GA4: G-J09NC2J8X4
+[EleraBooking] Loading Meta Pixel: [pixel_id]
+[EleraBooking] ✅ gtag.js loaded successfully
+[EleraBooking] ✅ Meta Pixel initialized
+[EleraBooking] Context loaded: {provider: "Dr. Smith", blogPosts: 3}
+[EleraBooking] Tracking page view...
+[EleraBooking] gtag available: true
+[EleraBooking] fbq available: true
+[EleraBooking] ✅ GA4 page_view sent
+[EleraBooking] ✅ Meta PageView & ViewContent sent
+```
+
+### 2. Schedule Intent Tracking (Automatic on `openBooking()`)
+
+When a user clicks a booking button and `window.elera.openBooking()` is called:
+
+**Google Ads:**
+- Fires remarketing conversion event
+
+**Google Analytics (GA4):**
+- Fires `begin_checkout` event (for funnel tracking)
+
+**Meta Pixel:**
+- Fires `InitiateCheckout` event
+
+**Server-side (Elera):**
+- Tracks `booking_modal_open`
+
+**Expected console output:**
+```
+[EleraBooking] === SCHEDULE INTENT ===
+[EleraBooking] ✅ GA4 begin_checkout sent
+[EleraBooking] ✅ Google Ads schedule_intent sent
+[EleraBooking] ✅ Meta InitiateCheckout sent
+```
+
+### 3. Conversion Tracking (Automatic on Booking Success)
+
+When a booking is completed inside the iframe, the SDK automatically fires:
+
+**Google Ads Conversion (REVENUE EVENT):**
+- Fires `conversion` event with `send_to: AW-17881598003/DWZpCK7P9-cbELOQzs5C`
+- Includes `value`, `currency`, `transaction_id`
+
+**Google Analytics (GA4):**
+- Fires `purchase` event with appointment details
+
+**Meta Pixel:**
+- Fires `Schedule` event (custom event)
+- Fires `Lead` event (standard event for lead gen)
+
+**Server-side (Elera + CAPI):**
+- Tracks `booking_completed` with GCLID for attribution
+- Fires Meta Conversions API event server-side (for iOS 14+ tracking)
+
+**Expected console output:**
+```
+[EleraBooking] === BOOKING CONVERSION ===
+[EleraBooking] Booking success data: {appointment_id: "...", value: 150}
+[EleraBooking] Firing Google Ads conversion to: AW-17881598003/DWZpCK7P9-cbELOQzs5C
+[EleraBooking] ✅ Google Ads conversion fired
+[EleraBooking] ✅ GA4 purchase event fired
+[EleraBooking] ✅ Meta Schedule & Lead events fired
+```
+
+### Verifying Tracking is Working
+
+After deployment, open the site with Chrome DevTools Console and verify:
+
+1. **Page Load:** Look for `gtag available: true` and `fbq available: true`
+2. **Click Booking Button:** Look for `=== SCHEDULE INTENT ===`
+3. **Complete Booking:** Look for `=== BOOKING CONVERSION ===` and `conversion fired`
+
+**If tracking is NOT firing**, check:
+- Is `sdk.js` loaded in index.html `<head>`?
+- Is SDK initialization running (look for `SDK instance created`)?
+- Are there any console errors?
+
+**Common Issues:**
+- `gtag not available` → SDK didn't initialize or is blocked by ad blocker
+- `fbq not available` → Meta Pixel not loading (ad blocker)
+- No console output → SDK not initialized, check API key
+
+---
+
 **Expected console output after deployment:**
 ```
 [EleraBooking] SDK v2.0.0 loaded
@@ -312,6 +423,7 @@ Only make these changes:
 **When clicking a booking button:**
 ```
 [Booking] Opening Elera booking modal...
+[EleraBooking] === SCHEDULE INTENT ===
 ```
 
 ---
