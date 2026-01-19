@@ -1,0 +1,56 @@
+name: Propagate PRD to All Sites
+
+on:
+  push:
+    paths:
+      - 'prd.md'
+    branches:
+      - main
+  workflow_dispatch:  # Manual "Deploy" button in GitHub UI
+    inputs:
+      dry_run:
+        description: 'Dry run (no actual changes)'
+        required: false
+        default: 'false'
+        type: boolean
+      specific_site:
+        description: 'Update specific site only (repo name, e.g., aaronshapiro33/site1)'
+        required: false
+        type: string
+
+concurrency:
+  group: prd-propagation
+  cancel-in-progress: false  # Don't cancel running propagations
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hours max for large deployments
+    
+    steps:
+      - name: Checkout PRD repo
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      - name: Update all sites
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SPECIFIC_SITE: ${{ inputs.specific_site || '' }}
+        run: python scripts/update-sites.py
+        
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: propagation-logs
+          path: logs/
+          retention-days: 30

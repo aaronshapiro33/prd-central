@@ -1,0 +1,10 @@
+{
+  "sites": [
+    {
+      "repo": "aaronshapiro33/ammaperozomorles",
+      "name": "Amma Peroz Omorles",
+      "enabled": true
+    }
+  ],
+  "_comment": "Add more sites here. Set enabled: false to skip a site temporarily."
+}
