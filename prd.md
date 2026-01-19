@@ -127,10 +127,16 @@ Find ALL buttons related to booking/scheduling and update their onClick handlers
   onClick={() => {
     console.log('[Booking] Opening Elera booking modal...');
     if (window.elera && window.elera.openBooking) {
+      // Get the site's primary color from CSS variable or computed style
+      // This ensures the booking modal matches the site's branding
+      const primaryColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary')?.trim() || '#5a7ffd';
+      
       window.elera.openBooking({
+        // Pass site colors to match branding
+        primaryColor: primaryColor,
         onSuccess: (data) => {
           console.log('[Booking] Success:', data);
-          // Optional: redirect or show success message
         },
         onClose: () => {
           console.log('[Booking] Modal closed');
@@ -138,7 +144,6 @@ Find ALL buttons related to booking/scheduling and update their onClick handlers
       });
     } else {
       console.error('[Booking] Elera SDK not ready');
-      // Fallback - show error or redirect
       alert('Booking system is loading, please try again.');
     }
   }} 
@@ -147,6 +152,24 @@ Find ALL buttons related to booking/scheduling and update their onClick handlers
   Schedule Now
 </button>
 ```
+
+**Theming Options for openBooking():**
+The booking modal can be themed to match the site's branding:
+```javascript
+window.elera.openBooking({
+  primaryColor: '#5a7ffd',      // Main button/accent color (hex)
+  secondaryColor: '#ebf0fa',    // Background color (hex)
+  accentColor: '#1eb464',       // Success states (hex)
+  fontFamily: 'Poppins',        // Google Font name
+  onSuccess: (data) => { ... },
+  onClose: () => { ... }
+});
+```
+
+**How to extract the site's primary color:**
+- Check for CSS variables: `--primary`, `--brand-color`, `--accent`
+- Look in `tailwind.config.js` for theme colors
+- Find the dominant button color used across the site
 
 **CRITICAL:** Keep ALL existing class names and styling exactly the same!
 
